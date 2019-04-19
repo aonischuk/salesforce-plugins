@@ -72,7 +72,9 @@ public class SalesforceReceiver extends Receiver<String> {
           store(message);
         }
       }
-    } catch (InterruptedException e) {
+    } catch (Exception e) {
+      // Since it's top level method of thread so we need to log the exception or exception will be unseen
+      LOG.error("Exception while receiving messages from pushTopic", e);
       throw new RuntimeException("Exception while receiving messages from pushTopic", e);
     }
   }

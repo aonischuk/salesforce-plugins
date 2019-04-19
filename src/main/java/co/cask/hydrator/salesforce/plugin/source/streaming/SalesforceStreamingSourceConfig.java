@@ -235,11 +235,17 @@ public class SalesforceStreamingSourceConfig extends BaseSalesforceConfig implem
         "Push topic name '%s' can only contain latin letters.", pushTopicName));
     }
 
-    QueryResult queryResult = partnerConnection.query(
-      String.format("SELECT Name, Query, NotifyForOperationCreate, " +
-                      "NotifyForOperationUpdate, NotifyForOperationDelete, " +
-                      "NotifyForFields FROM PushTopic WHERE Name = '%s'", pushTopicName));
-
+    QueryResult queryResult;
+    ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+    try {
+      Thread.currentThread().setContextClassLoader(SalesforceStreamingSourceConfig.class.getClassLoader());
+      queryResult = partnerConnection.query(
+        String.format("SELECT Id, Name, Query, NotifyForOperationCreate, " +
+                        "NotifyForOperationUpdate, NotifyForOperationDelete, " +
+                        "NotifyForFields FROM PushTopic WHERE Name = '%s'", pushTopicName));
+    } finally {
+      Thread.currentThread().setContextClassLoader(classLoader);
+    }
 
     SObject[] records = queryResult.getRecords();
 
